@@ -21,5 +21,7 @@ class Settings(BaseSettings):
 
     @property
     def manual_gupy_urls(self) -> list[str]:
-        urls = (line.strip() for line in self.gupy_urls.splitlines())
+        # workflow_dispatch renders string inputs as a single-line field, so pasted
+        # line breaks may arrive as spaces. Gupy URLs never contain whitespace.
+        urls = (value.strip() for value in self.gupy_urls.split())
         return list(dict.fromkeys(url for url in urls if url))
