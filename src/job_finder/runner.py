@@ -46,6 +46,7 @@ def run(settings: Settings, trigger: str = "scheduled") -> int:
             GupyPortal(
                 timeout=settings.request_timeout_seconds,
                 max_pages_per_term=settings.gupy_max_pages_per_term,
+                manual_urls=settings.manual_gupy_urls,
             ),
             LinkedInPublicJobs(
                 timeout=settings.request_timeout_seconds,

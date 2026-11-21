@@ -12,7 +12,7 @@ As fontes atuais são comunidades brasileiras no GitHub, o portal público da Gu
 4. As vagas são enviadas em lotes idempotentes.
 5. A execução é concluída com contagens e novos cursores.
 
-O workflow agendado roda a cada quatro horas. Também pode ser iniciado manualmente na aba **Actions**.
+O workflow agendado roda a cada quatro horas. Também pode ser iniciado manualmente na aba **Actions**. Na execução manual, o campo opcional `gupy_urls` aceita uma URL pública da Gupy por linha; os IDs já existentes são atualizados, não duplicados.
 
 ## Requisitos
 

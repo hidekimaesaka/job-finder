@@ -124,7 +124,11 @@ def _is_allowed_local_location(location: str | None) -> bool:
 
 
 def evaluate(
-    text: str, profile: SearchProfile, *, location: str | None = None
+    text: str,
+    profile: SearchProfile,
+    *,
+    location: str | None = None,
+    seniority_hint: str | None = None,
 ) -> Match | None:
     normalized = normalize_text(text)
     if any(normalize_text(term) in normalized for term in profile.excluded_terms):
@@ -134,7 +138,7 @@ def evaluate(
     if not technologies:
         return None
 
-    seniority = detect_seniority(normalized)
+    seniority = seniority_hint or detect_seniority(normalized)
     if seniority == "senior" or (
         seniority != "unknown" and seniority not in profile.seniorities
     ):

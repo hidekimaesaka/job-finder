@@ -27,6 +27,8 @@ A integração usa issues alteradas desde o cursor confirmado pelo backend. Pull
 
 O coletor consulta uma busca por tecnologia, lê o `__NEXT_DATA__` entregue pelo próprio portal e limita a paginação por configuração. Não acessa candidaturas, currículos nem áreas autenticadas.
 
+Execuções manuais aceitam uma lista opcional de URLs públicas `*.gupy.io`. Essas vagas são tratadas como seleção explícita: entram mesmo quando o texto não contém uma tecnologia do perfil e são atualizadas sem duplicação pelo ID da Gupy. A importação não acessa login nem envia candidatura.
+
 ## LinkedIn
 
 O coletor consulta apenas os cartões públicos de vagas brasileiras publicados nos últimos sete dias. Cada combinação de tecnologia e senioridade gera uma consulta; não há login, cookies persistentes, acesso a perfis ou páginas de candidatos. Há um intervalo mínimo de três segundos entre consultas. Respostas `429` ou `999` usam retentativas com espera progressiva; se o bloqueio persistir, as outras fontes ainda são salvas e a execução fica marcada como parcial.

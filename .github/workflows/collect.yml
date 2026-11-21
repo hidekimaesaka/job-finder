@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "17 */4 * * *"
   workflow_dispatch:
+    inputs:
+      gupy_urls:
+        description: "URLs públicas da Gupy, uma por linha (opcional)"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -27,4 +32,5 @@ jobs:
           KALI_API_URL: ${{ vars.KALI_API_URL }}
           KALI_JOB_FINDER_TOKEN: ${{ secrets.KALI_JOB_FINDER_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
+          GUPY_URLS: ${{ inputs.gupy_urls || '' }}
         run: uv run python -m job_finder --trigger "${{ github.event_name == 'workflow_dispatch' && 'manual' || 'scheduled' }}"
