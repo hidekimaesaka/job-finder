@@ -29,6 +29,8 @@ O coletor consulta uma busca por tecnologia, lê o `__NEXT_DATA__` entregue pelo
 
 Execuções manuais aceitam uma lista opcional de URLs públicas `*.gupy.io`. Essas vagas são tratadas como seleção explícita: entram mesmo quando o texto não contém uma tecnologia do perfil e são atualizadas sem duplicação pelo ID da Gupy. A importação não acessa login nem envia candidatura.
 
+Vagas afirmativas, exclusivas ou reservadas a grupos específicos são descartadas antes do envio ao Kali. O filtro exige linguagem de restrição no título ou no texto da vaga; mensagens gerais de diversidade e inclusão não são motivo de descarte.
+
 ## LinkedIn
 
 O coletor consulta apenas os cartões públicos de vagas brasileiras publicados nos últimos sete dias. Cada combinação de tecnologia e senioridade gera uma consulta; não há login, cookies persistentes, acesso a perfis ou páginas de candidatos. Há um intervalo mínimo de três segundos entre consultas. Respostas `429` ou `999` usam retentativas com espera progressiva; se o bloqueio persistir, as outras fontes ainda são salvas e a execução fica marcada como parcial.

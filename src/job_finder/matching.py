@@ -15,6 +15,27 @@ SENIOR_PATTERNS = (r"\bsenior\b", r"\bsr\.?\b", r"\bstaff\b", r"\blead\b", r"\be
 MID_PATTERNS = (r"\bpleno\b", r"\bmid(?:-level)?\b")
 JUNIOR_PATTERNS = (r"\bjunior\b", r"\bjr\.?\b", r"\bentry(?:-level)?\b")
 
+AFFIRMATIVE_GROUP_PATTERN = (
+    r"(?:mulher(?:es)?|sexo feminino|genero feminino|"
+    r"pessoas? (?:com deficiencia|com tea|autistas?|negras?|pretas?|pardas?|"
+    r"trans(?:genero)?s?|indigenas?|neurodivergentes?)|"
+    r"pcds?|tea|lgbtqia\+?|lgbtq\+?|lgbt\+?|travestis?|homens trans|maes|"
+    r"women|female candidates?|people with disabilities|black people|"
+    r"trans people|indigenous people)"
+)
+AFFIRMATIVE_RESTRICTION_PATTERNS = (
+    r"\bvagas?\s+afirmativas?\b",
+    rf"\b(?:vaga|oportunidade|posicao|processo seletivo|programa)\s+"
+    rf"(?:exclusiv[ao]|afirmativ[ao]|preferencial)\b.{{0,80}}\b{AFFIRMATIVE_GROUP_PATTERN}(?!\w)",
+    rf"\b(?:exclusiv[ao]|afirmativ[ao]|preferencial(?:mente)?)\b.{{0,80}}"
+    rf"\b{AFFIRMATIVE_GROUP_PATTERN}(?!\w)",
+    rf"\b(?:somente|apenas|destinad[ao]s?|voltad[ao]s?|reservad[ao]s?)\s+"
+    rf"(?:para|ao?|a)\s+(?:publico\s+)?{AFFIRMATIVE_GROUP_PATTERN}(?!\w)",
+    rf"\b(?:exclusive(?:ly)? for|affirmative (?:job|position)|"
+    rf"only for|reserved for)\s+{AFFIRMATIVE_GROUP_PATTERN}(?!\w)",
+    rf"\b{AFFIRMATIVE_GROUP_PATTERN}(?!\w)\s+only\b",
+)
+
 ALLOWED_LOCAL_CITIES = frozenset(
     {
         "barueri",
@@ -106,6 +127,14 @@ def technology_matches(text: str, requested: list[str]) -> tuple[list[str], list
     return technologies, terms
 
 
+def is_restricted_affirmative_job(text: str) -> bool:
+    normalized = normalize_text(text)
+    title = normalized.splitlines()[0] if normalized else ""
+    if re.search(r"(?:^|[\s|()[\]/_-])pcds?(?:$|[\s|()[\]/_-])", title):
+        return True
+    return _matches(normalized, AFFIRMATIVE_RESTRICTION_PATTERNS)
+
+
 def _is_allowed_local_location(location: str | None) -> bool:
     if not location:
         return False
@@ -131,6 +160,8 @@ def evaluate(
     seniority_hint: str | None = None,
 ) -> Match | None:
     normalized = normalize_text(text)
+    if is_restricted_affirmative_job(text):
+        return None
     if any(normalize_text(term) in normalized for term in profile.excluded_terms):
         return None
 

@@ -178,5 +178,80 @@ def test_gupy_imports_explicit_job_url_without_automatic_match() -> None:
         "requested": 2,
         "fetched": 2,
         "imported": 2,
+        "excluded": 0,
+    }
+
+
+def test_gupy_manual_import_rejects_restricted_affirmative_job() -> None:
+    job_url = "https://acme.gupy.io/job/affirmative"
+    payload = {
+        "props": {
+            "pageProps": {
+                "job": {
+                    "id": 456,
+                    "name": "Desenvolvedora Python | Vaga afirmativa para mulheres",
+                    "description": "Trabalho remoto.",
+                    "careerPage": {"name": "Acme"},
+                    "publishedAt": "2026-11-21T10:00:00Z",
+                    "expiresAt": "2026-12-31",
+                    "workplaceType": "remote",
+                    "status": "published",
+                }
+            }
+        }
+    }
+    html = (
+        '<script id="__NEXT_DATA__" type="application/json">'
+        + json.dumps(payload)
+        + "</script>"
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "portal.gupy.io":
+            empty = {
+                "props": {
+                    "pageProps": {
+                        "initialJobList": {"data": [], "pagination": {"total": 0}}
+                    }
+                }
+            }
+            return httpx.Response(
+                200,
+                text=(
+                    '<script id="__NEXT_DATA__" type="application/json">'
+                    + json.dumps(empty)
+                    + "</script>"
+                ),
+            )
+        return httpx.Response(200, text=html)
+
+    source = GupyPortal(
+        max_pages_per_term=1,
+        manual_urls=[job_url],
+        transport=httpx.MockTransport(handler),
+    )
+    try:
+        result = source.collect(
+            SearchProfile.model_validate(
+                {
+                    "technologies": ["Python"],
+                    "seniorities": ["junior", "mid"],
+                    "workModes": ["remote", "hybrid", "onsite"],
+                    "excludedTerms": [],
+                    "updatedAt": datetime.now(UTC),
+                }
+            ),
+            {},
+        )
+    finally:
+        source.close()
+
+    assert result.jobs == []
+    assert result.errors == []
+    assert result.stats["gupy:manual"] == {
+        "requested": 1,
+        "fetched": 1,
+        "imported": 0,
+        "excluded": 1,
     }
 

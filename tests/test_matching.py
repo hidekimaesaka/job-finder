@@ -1,6 +1,11 @@
 from datetime import UTC, datetime
 
-from job_finder.matching import detect_seniority, evaluate, normalize_text
+from job_finder.matching import (
+    detect_seniority,
+    evaluate,
+    is_restricted_affirmative_job,
+    normalize_text,
+)
 from job_finder.models import SearchProfile
 
 
@@ -47,19 +52,44 @@ def test_work_mode_and_excluded_terms_are_respected() -> None:
 
 
 def test_hybrid_and_onsite_jobs_are_limited_to_allowed_nearby_cities() -> None:
-    assert evaluate(
-        "Python pleno híbrido", profile(), location="São Paulo, SP"
-    ) is not None
-    assert evaluate(
-        "Python pleno presencial", profile(), location="Campinas, SP"
-    ) is not None
+    assert evaluate("Python pleno híbrido", profile(), location="São Paulo, SP") is not None
+    assert evaluate("Python pleno presencial", profile(), location="Campinas, SP") is not None
     assert evaluate("Python pleno híbrido", profile(), location="Jundiaí - SP") is not None
-    assert evaluate(
-        "Python pleno híbrido", profile(), location="Jundiaí, São Paulo, Brazil"
-    ) is not None
-    assert evaluate(
-        "Python pleno presencial", profile(), location="Campinas e Região, SP"
-    ) is not None
+    assert (
+        evaluate("Python pleno híbrido", profile(), location="Jundiaí, São Paulo, Brazil")
+        is not None
+    )
+    assert (
+        evaluate("Python pleno presencial", profile(), location="Campinas e Região, SP")
+        is not None
+    )
     assert evaluate("Python pleno presencial", profile(), location="ABC Paulista") is not None
     assert evaluate("Python pleno híbrido", profile(), location="Ribeirão Preto, SP") is None
     assert evaluate("Python pleno remoto", profile(), location="Recife, PE") is not None
+
+
+def test_restricted_affirmative_jobs_are_rejected() -> None:
+    restricted = (
+        "Pessoa Desenvolvedora Java Pleno | Vaga afirmativa para mulheres",
+        "Desenvolvedor Python Jr. (PCD)",
+        "Oportunidade exclusiva para pessoas negras - React remoto",
+        "Vaga destinada ao publico LGBTQIA+ para trabalhar com C# remoto",
+        "Desenvolvimento Back-End Java Pleno (Vaga afirmativa)",
+        "Banco de talentos exclusivo para pessoas com TEA",
+        "Python developer - women only - remote",
+    )
+
+    for text in restricted:
+        assert is_restricted_affirmative_job(text)
+        assert evaluate(text, profile()) is None
+
+
+def test_general_diversity_language_is_not_treated_as_restriction() -> None:
+    text = (
+        "Pessoa Desenvolvedora Python Júnior remoto\n"
+        "Valorizamos diversidade e incentivamos candidaturas de mulheres, "
+        "pessoas negras, PCD e pessoas LGBTQIA+. Todas as pessoas são bem-vindas."
+    )
+
+    assert not is_restricted_affirmative_job(text)
+    assert evaluate(text, profile()) is not None

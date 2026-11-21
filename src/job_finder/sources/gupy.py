@@ -12,6 +12,7 @@ from job_finder.matching import (
     detect_seniority,
     detect_work_mode,
     evaluate,
+    is_restricted_affirmative_job,
     normalize_text,
     technology_matches,
 )
@@ -142,7 +143,7 @@ class GupyPortal:
         requested_url: str,
         canonical_url: str | None,
         profile: SearchProfile,
-    ) -> NormalizedJob:
+    ) -> NormalizedJob | None:
         external_id = str(item.get("id") or "")
         title = str(item.get("name") or "").strip()
         if not external_id or not title:
@@ -171,6 +172,8 @@ class GupyPortal:
         state = str(item.get("addressState") or "").strip()
         location = ", ".join(value for value in (city, state) if value) or None
         text = "\n".join((title, company or "", mode_term, description))
+        if is_restricted_affirmative_job(text):
+            return None
         normalized = normalize_text(text)
         technologies, matched_terms = technology_matches(normalized, profile.technologies)
         seniority = detect_seniority(normalize_text(title))
@@ -288,6 +291,7 @@ class GupyPortal:
         manual_source = "gupy:manual"
         manual_fetched = 0
         manual_imported = 0
+        manual_excluded = 0
         for url in self.manual_urls:
             try:
                 self._validate_manual_url(url)
@@ -295,6 +299,9 @@ class GupyPortal:
                 item, canonical_url = self._job_data(response)
                 manual_fetched += 1
                 job = self._manual_job(item, url, canonical_url, profile)
+                if job is None:
+                    manual_excluded += 1
+                    continue
                 jobs[job.external_id] = job
                 manual_imported += 1
             except Exception as exc:
@@ -308,6 +315,7 @@ class GupyPortal:
                 "requested": len(self.manual_urls),
                 "fetched": manual_fetched,
                 "imported": manual_imported,
+                "excluded": manual_excluded,
             }
 
         return CollectionResult(
