@@ -1,0 +1,30 @@
+name: Collect jobs
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: job-finder-collection
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+      - run: uv sync --frozen --no-dev
+      - name: Collect matching jobs
+        env:
+          KALI_API_URL: ${{ vars.KALI_API_URL }}
+          KALI_JOB_FINDER_TOKEN: ${{ secrets.KALI_JOB_FINDER_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run python -m job_finder --trigger "${{ github.event_name == 'workflow_dispatch' && 'manual' || 'scheduled' }}"
