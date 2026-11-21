@@ -29,7 +29,7 @@ O coletor consulta uma busca por tecnologia, lê o `__NEXT_DATA__` entregue pelo
 
 ## LinkedIn
 
-O coletor consulta apenas os cartões públicos de vagas brasileiras publicados nos últimos sete dias. Cada combinação de tecnologia e senioridade gera uma consulta; não há login, cookies persistentes, acesso a perfis ou páginas de candidatos. Respostas `429` ou `999` encerram a fonte como falha parcial, sem tentativa de contorno.
+O coletor consulta apenas os cartões públicos de vagas brasileiras publicados nos últimos sete dias. Cada combinação de tecnologia e senioridade gera uma consulta; não há login, cookies persistentes, acesso a perfis ou páginas de candidatos. Há um intervalo mínimo de três segundos entre consultas. Respostas `429` ou `999` usam retentativas com espera progressiva; se o bloqueio persistir, as outras fontes ainda são salvas e a execução fica marcada como parcial.
 
 O LinkedIn não oferece uma API pública geral de busca de vagas. A manutenção desta integração pressupõe a autorização informada pelo mantenedor e deve ser desativada se essa autorização for revogada.
 

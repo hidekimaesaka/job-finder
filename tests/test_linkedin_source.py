@@ -47,3 +47,28 @@ def test_linkedin_public_search_normalizes_cards() -> None:
     assert result.jobs[0].seniority == "junior"
     assert result.jobs[0].work_mode == "remote"
 
+
+def test_linkedin_retries_rate_limits_with_longer_backoff(monkeypatch) -> None:
+    attempts = 0
+    delays: list[float] = []
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            return httpx.Response(429)
+        return httpx.Response(200, text='<div class="no-results"></div>')
+
+    monkeypatch.setattr("job_finder.sources.linkedin.time.sleep", delays.append)
+    source = LinkedInPublicJobs(
+        request_delay_seconds=0, transport=httpx.MockTransport(handler)
+    )
+    try:
+        response = source._request({"keywords": "Python Junior"})
+    finally:
+        source.close()
+
+    assert response.status_code == 200
+    assert attempts == 3
+    assert delays == [5, 10]
+

@@ -25,7 +25,7 @@ class LinkedInPublicJobs:
     def __init__(
         self,
         timeout: float = 30,
-        request_delay_seconds: float = 1,
+        request_delay_seconds: float = 3,
         transport: httpx.BaseTransport | None = None,
     ):
         self.request_delay_seconds = request_delay_seconds
@@ -48,7 +48,8 @@ class LinkedInPublicJobs:
 
     def _request(self, params: dict[str, str]) -> httpx.Response:
         last_error: Exception | None = None
-        for attempt in range(3):
+        for attempt in range(4):
+            response: httpx.Response | None = None
             try:
                 response = self.client.get("/jobs/search/", params=params)
                 if response.status_code < 500 and response.status_code not in {429, 999}:
@@ -61,8 +62,18 @@ class LinkedInPublicJobs:
                 )
             except (httpx.TimeoutException, httpx.TransportError) as exc:
                 last_error = exc
-            if attempt < 2:
-                time.sleep(2**attempt)
+            if attempt < 3:
+                retry_after = response.headers.get("Retry-After") if response else None
+                delay = (
+                    min(float(retry_after), 60)
+                    if retry_after and retry_after.isdigit()
+                    else 5 * 2**attempt
+                )
+                logger.warning(
+                    "LinkedIn limitou a consulta; nova tentativa agendada",
+                    extra={"fields": {"attempt": attempt + 1, "delay_seconds": delay}},
+                )
+                time.sleep(delay)
         assert last_error is not None
         raise last_error
 
