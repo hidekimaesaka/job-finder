@@ -37,8 +37,20 @@ def test_gupy_normalizes_jobs_and_applies_location_rule() -> None:
                             "state": "São Paulo",
                             "jobUrl": "https://outra.gupy.io/job/102",
                         },
+                        {
+                            "id": 103,
+                            "name": "Desenvolvedor Python Pleno",
+                            "description": "APIs em Python.",
+                            "careerPageName": "Distante",
+                            "publishedDate": "2026-11-21T08:00:00Z",
+                            "applicationDeadline": "2026-12-31T00:00:00Z",
+                            "workplaceType": "on-site",
+                            "city": "Ribeirão Preto",
+                            "state": "São Paulo",
+                            "jobUrl": "https://distante.gupy.io/job/103",
+                        },
                     ],
-                    "pagination": {"total": 2, "limit": 12, "offset": 0},
+                    "pagination": {"total": 3, "limit": 12, "offset": 0},
                 }
             }
         }
@@ -69,9 +81,11 @@ def test_gupy_normalizes_jobs_and_applies_location_rule() -> None:
         source.close()
 
     assert result.errors == []
-    assert len(result.jobs) == 1
-    assert result.jobs[0].external_id == "101"
-    assert result.jobs[0].company == "Acme"
-    assert result.jobs[0].work_mode == "hybrid"
-    assert result.jobs[0].location == "São Paulo, São Paulo"
+    assert {job.external_id for job in result.jobs} == {"101", "102"}
+    sao_paulo = next(job for job in result.jobs if job.external_id == "101")
+    campinas = next(job for job in result.jobs if job.external_id == "102")
+    assert sao_paulo.company == "Acme"
+    assert sao_paulo.work_mode == "hybrid"
+    assert sao_paulo.location == "São Paulo, São Paulo"
+    assert campinas.location == "Campinas, São Paulo"
 

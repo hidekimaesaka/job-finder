@@ -15,6 +15,44 @@ SENIOR_PATTERNS = (r"\bsenior\b", r"\bsr\.?\b", r"\bstaff\b", r"\blead\b", r"\be
 MID_PATTERNS = (r"\bpleno\b", r"\bmid(?:-level)?\b")
 JUNIOR_PATTERNS = (r"\bjunior\b", r"\bjr\.?\b", r"\bentry(?:-level)?\b")
 
+ALLOWED_LOCAL_CITIES = frozenset(
+    {
+        "barueri",
+        "campinas",
+        "carapicuiba",
+        "cotia",
+        "diadema",
+        "guarulhos",
+        "indaiatuba",
+        "itupeva",
+        "jundiai",
+        "louveira",
+        "maua",
+        "mogi das cruzes",
+        "osasco",
+        "santana de parnaiba",
+        "santo andre",
+        "sao bernardo do campo",
+        "sao caetano do sul",
+        "sao paulo",
+        "sorocaba",
+        "taboao da serra",
+        "valinhos",
+        "vinhedo",
+    }
+)
+ALLOWED_LOCAL_REGIONS = frozenset(
+    {
+        "abc paulista",
+        "alphaville",
+        "campinas metropolitan area",
+        "grande sao paulo",
+        "greater sao paulo area",
+        "regiao metropolitana de campinas",
+        "regiao metropolitana de sao paulo",
+    }
+)
+
 
 @dataclass(frozen=True)
 class Match:
@@ -68,15 +106,20 @@ def technology_matches(text: str, requested: list[str]) -> tuple[list[str], list
     return technologies, terms
 
 
-def _is_sao_paulo_city(location: str | None) -> bool:
+def _is_allowed_local_location(location: str | None) -> bool:
     if not location:
         return False
     normalized = normalize_text(location).strip()
-    return bool(
-        re.fullmatch(
-            r"sao paulo(?:\s*[-/,]\s*(?:sp|sao paulo|brasil))?",
-            normalized,
-        )
+    if normalized in ALLOWED_LOCAL_REGIONS:
+        return True
+    suffix = (
+        r"(?: e regiao)?"
+        r"(?:\s*[-/]\s*sp|,\s*(?:sp|sao paulo))?"
+        r"(?:,\s*(?:brasil|brazil))?"
+    )
+    return any(
+        re.fullmatch(rf"{re.escape(city)}{suffix}", normalized)
+        for city in ALLOWED_LOCAL_CITIES
     )
 
 
@@ -104,7 +147,7 @@ def evaluate(
         return None
     if work_mode != "unknown" and work_mode not in selected_modes:
         return None
-    if work_mode in {"hybrid", "onsite"} and not _is_sao_paulo_city(location):
+    if work_mode in {"hybrid", "onsite"} and not _is_allowed_local_location(location):
         return None
 
     return Match(

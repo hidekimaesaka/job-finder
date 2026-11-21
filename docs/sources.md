@@ -36,5 +36,6 @@ O LinkedIn não oferece uma API pública geral de busca de vagas. A manutenção
 ## Regra geográfica
 
 - remoto: qualquer cidade;
-- híbrido ou presencial: somente a cidade de São Paulo;
-- `São Paulo e Região` não é considerado equivalente à cidade.
+- híbrido ou presencial: São Paulo, Guarulhos, Osasco, Barueri, Carapicuíba, Cotia, Taboão da Serra, Santana de Parnaíba, Santo André, São Bernardo do Campo, São Caetano do Sul, Diadema, Mauá, Mogi das Cruzes, Campinas, Valinhos, Vinhedo, Indaiatuba, Jundiaí, Itupeva, Louveira e Sorocaba;
+- também são aceitos `Grande São Paulo`, `ABC Paulista`, `Alphaville`, `Região Metropolitana de São Paulo` e `Região Metropolitana de Campinas`, inclusive os equivalentes em inglês retornados pelas fontes;
+- nomes como `Campinas e Região` são aceitos quando a cidade-base está na lista.

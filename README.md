@@ -21,7 +21,7 @@ O workflow agendado roda a cada quatro horas. Também pode ser iniciado manualme
 - token do worker compartilhado com a API
 - token do GitHub para execuções locais
 
-Vagas híbridas ou presenciais só são aceitas quando a localização é a cidade de São Paulo. Vagas remotas podem estar em qualquer localidade.
+Vagas remotas podem estar em qualquer localidade. Vagas híbridas ou presenciais são limitadas à Grande São Paulo e aos corredores próximos de Campinas, Jundiaí e Sorocaba; a lista exata fica documentada em `docs/sources.md`.
 
 ## Execução local
 

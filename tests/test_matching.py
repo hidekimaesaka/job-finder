@@ -46,13 +46,20 @@ def test_work_mode_and_excluded_terms_are_respected() -> None:
     assert evaluate("Projeto voluntário Python júnior remoto", excluded) is None
 
 
-def test_hybrid_and_onsite_jobs_are_limited_to_sao_paulo_city() -> None:
+def test_hybrid_and_onsite_jobs_are_limited_to_allowed_nearby_cities() -> None:
     assert evaluate(
         "Python pleno híbrido", profile(), location="São Paulo, SP"
     ) is not None
     assert evaluate(
-        "Python pleno presencial", profile(), location="São Paulo/São Paulo"
+        "Python pleno presencial", profile(), location="Campinas, SP"
     ) is not None
-    assert evaluate("Python pleno híbrido", profile(), location="Campinas, SP") is None
-    assert evaluate("Python pleno presencial", profile(), location="São Paulo e Região") is None
+    assert evaluate("Python pleno híbrido", profile(), location="Jundiaí - SP") is not None
+    assert evaluate(
+        "Python pleno híbrido", profile(), location="Jundiaí, São Paulo, Brazil"
+    ) is not None
+    assert evaluate(
+        "Python pleno presencial", profile(), location="Campinas e Região, SP"
+    ) is not None
+    assert evaluate("Python pleno presencial", profile(), location="ABC Paulista") is not None
+    assert evaluate("Python pleno híbrido", profile(), location="Ribeirão Preto, SP") is None
     assert evaluate("Python pleno remoto", profile(), location="Recife, PE") is not None
