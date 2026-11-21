@@ -118,12 +118,15 @@ class GithubCommunities:
                 for issue in issues:
                     title = str(issue.get("title") or "")
                     body = str(issue.get("body") or "")
+                    location = extract_location(title)
                     labels = " ".join(
                         str(label.get("name") or "")
                         for label in issue.get("labels", [])
                         if isinstance(label, dict)
                     )
-                    match = evaluate("\n".join((title, labels, body)), profile)
+                    match = evaluate(
+                        "\n".join((title, labels, body)), profile, location=location
+                    )
                     if match is None:
                         continue
                     matched += 1
@@ -134,7 +137,7 @@ class GithubCommunities:
                             title=title,
                             company=extract_company(title),
                             source_url=str(issue["html_url"]),
-                            location=extract_location(title),
+                            location=location,
                             work_mode=match.work_mode,
                             seniority=match.seniority,
                             technologies=match.technologies,

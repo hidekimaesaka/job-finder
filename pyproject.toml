@@ -4,12 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "job-finder"
-version = "0.1.0"
+version = "0.2.0"
 description = "Coletor de vagas para o monitor do Kali"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 license = { file = "LICENSE" }
 dependencies = [
+  "beautifulsoup4>=4.13,<5",
   "httpx>=0.28,<1",
   "pydantic>=2.10,<3",
   "pydantic-settings>=2.7,<3",

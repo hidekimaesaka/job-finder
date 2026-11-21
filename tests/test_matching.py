@@ -40,7 +40,19 @@ def test_unknown_seniority_is_included_and_senior_is_rejected() -> None:
 
 def test_work_mode_and_excluded_terms_are_respected() -> None:
     remote_only = profile(workModes=["remote"])
-    assert evaluate("Python júnior presencial", remote_only) is None
+    assert evaluate("Python júnior presencial", remote_only, location="São Paulo, SP") is None
     assert evaluate("Python júnior", remote_only) is None
     excluded = profile(excludedTerms=["voluntário"])
     assert evaluate("Projeto voluntário Python júnior remoto", excluded) is None
+
+
+def test_hybrid_and_onsite_jobs_are_limited_to_sao_paulo_city() -> None:
+    assert evaluate(
+        "Python pleno híbrido", profile(), location="São Paulo, SP"
+    ) is not None
+    assert evaluate(
+        "Python pleno presencial", profile(), location="São Paulo/São Paulo"
+    ) is not None
+    assert evaluate("Python pleno híbrido", profile(), location="Campinas, SP") is None
+    assert evaluate("Python pleno presencial", profile(), location="São Paulo e Região") is None
+    assert evaluate("Python pleno remoto", profile(), location="Recife, PE") is not None

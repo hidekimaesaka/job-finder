@@ -2,7 +2,7 @@
 
 ## Responsabilidades
 
-O `job-finder` consulta e normaliza fontes. Ele não conhece o banco Neon, não serve páginas e não armazena estado local entre execuções.
+O `job-finder` consulta e normaliza fontes independentes. Ele não conhece o banco Neon, não serve páginas e não armazena estado local entre execuções.
 
 O `kali-backend` autentica o worker, entrega os critérios, persiste vagas e execuções e resolve idempotência. O frontend apenas lê e altera dados por essa API.
 
@@ -17,6 +17,8 @@ Kali static site -----------------+
 Uma execução começa com `POST /api/internal/v1/job-finder/runs`. A resposta contém um identificador, o perfil de busca e os cursores confirmados pela última execução bem-sucedida.
 
 Cada adaptador devolve vagas normalizadas, cursores e estatísticas. Os lotes usam a chave `(source, external_id)`, portanto reenviar a mesma vaga atualiza o registro existente. O cursor só avança na conclusão; uma falha não cria uma lacuna silenciosa.
+
+GitHub, Gupy e LinkedIn falham de forma independente. Se pelo menos uma fonte concluir, os dados válidos são enviados e a execução fica `partial`; nenhuma fonte pode impedir silenciosamente o avanço das demais.
 
 ## Falhas
 

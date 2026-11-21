@@ -68,7 +68,21 @@ def technology_matches(text: str, requested: list[str]) -> tuple[list[str], list
     return technologies, terms
 
 
-def evaluate(text: str, profile: SearchProfile) -> Match | None:
+def _is_sao_paulo_city(location: str | None) -> bool:
+    if not location:
+        return False
+    normalized = normalize_text(location).strip()
+    return bool(
+        re.fullmatch(
+            r"sao paulo(?:\s*[-/,]\s*(?:sp|sao paulo|brasil))?",
+            normalized,
+        )
+    )
+
+
+def evaluate(
+    text: str, profile: SearchProfile, *, location: str | None = None
+) -> Match | None:
     normalized = normalize_text(text)
     if any(normalize_text(term) in normalized for term in profile.excluded_terms):
         return None
@@ -89,6 +103,8 @@ def evaluate(text: str, profile: SearchProfile) -> Match | None:
     if work_mode == "unknown" and selected_modes != all_modes:
         return None
     if work_mode != "unknown" and work_mode not in selected_modes:
+        return None
+    if work_mode in {"hybrid", "onsite"} and not _is_sao_paulo_city(location):
         return None
 
     return Match(

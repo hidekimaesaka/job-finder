@@ -2,13 +2,13 @@
 
 `job-finder` coleta vagas públicas que correspondem ao perfil configurado no Kali. Ele roda como uma tarefa curta, normaliza os resultados e os envia para a API do projeto. O banco de dados e as credenciais do usuário não ficam neste repositório.
 
-A primeira fonte implementada usa issues públicas de comunidades brasileiras no GitHub. Não há automação de LinkedIn, Indeed ou de qualquer plataforma que não ofereça uma forma permitida e estável de acesso.
+As fontes atuais são comunidades brasileiras no GitHub, o portal público da Gupy e a busca pública de vagas do LinkedIn. A integração do LinkedIn é isolada e conservadora: não usa conta, cookies, perfis, mensagens ou dados de candidatos e depende da autorização confirmada pelo mantenedor do projeto.
 
 ## Fluxo
 
 1. O GitHub Actions inicia uma execução no `kali-backend`.
 2. A API devolve os critérios atuais e os cursores das fontes.
-3. O coletor consulta as comunidades, classifica e remove resultados incompatíveis.
+3. O coletor consulta cada fonte, classifica e remove resultados incompatíveis.
 4. As vagas são enviadas em lotes idempotentes.
 5. A execução é concluída com contagens e novos cursores.
 
@@ -20,6 +20,8 @@ O workflow agendado roda a cada quatro horas. Também pode ser iniciado manualme
 - uma API Kali com as rotas internas do monitor de vagas
 - token do worker compartilhado com a API
 - token do GitHub para execuções locais
+
+Vagas híbridas ou presenciais só são aceitas quando a localização é a cidade de São Paulo. Vagas remotas podem estar em qualquer localidade.
 
 ## Execução local
 

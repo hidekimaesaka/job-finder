@@ -18,6 +18,8 @@ Para uma execução manual, abra **Actions**, selecione **Collect jobs** e use *
 
 Os logs são JSON e incluem fonte, quantidades e identificador da execução. Comece pelo primeiro registro com nível `ERROR`. Nunca copie um token para os logs ao reproduzir uma falha.
 
+O LinkedIn pode responder com `429` ou `999`. O coletor não tenta contornar o bloqueio: registra a fonte como parcial e preserva os resultados das demais. A Gupy pode falhar se alterar a estrutura do `__NEXT_DATA__`; nesse caso, atualize somente o adaptador e suas fixtures.
+
 Repositórios públicos podem ter workflows agendados desativados após 60 dias sem atividade. Quando o Kali mostrar `Atrasado`, confirme se o workflow continua habilitado antes de investigar as fontes.
 
 ## Rotação do token
