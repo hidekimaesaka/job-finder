@@ -1,3 +1,5 @@
+import re
+
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,7 +23,7 @@ class Settings(BaseSettings):
 
     @property
     def manual_gupy_urls(self) -> list[str]:
-        # workflow_dispatch renders string inputs as a single-line field, so pasted
-        # line breaks may arrive as spaces. Gupy URLs never contain whitespace.
-        urls = (value.strip() for value in self.gupy_urls.split())
+        # GitHub may remove pasted line breaks from workflow_dispatch string inputs.
+        # Split on the next URL as well as whitespace so concatenated values survive.
+        urls = re.findall(r"https://.*?(?=https://|\s|$)", self.gupy_urls)
         return list(dict.fromkeys(url for url in urls if url))
