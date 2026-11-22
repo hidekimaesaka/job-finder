@@ -72,3 +72,28 @@ def test_linkedin_retries_rate_limits_with_longer_backoff(monkeypatch) -> None:
     assert attempts == 3
     assert delays == [5, 10]
 
+
+def test_linkedin_retries_temporary_forbidden_response(monkeypatch) -> None:
+    attempts = 0
+    delays: list[float] = []
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return httpx.Response(403)
+        return httpx.Response(200, text='<div class="no-results"></div>')
+
+    monkeypatch.setattr("job_finder.sources.linkedin.time.sleep", delays.append)
+    source = LinkedInPublicJobs(
+        request_delay_seconds=0, transport=httpx.MockTransport(handler)
+    )
+    try:
+        response = source._request({"keywords": "C# Junior"})
+    finally:
+        source.close()
+
+    assert response.status_code == 200
+    assert attempts == 2
+    assert delays == [5]
+

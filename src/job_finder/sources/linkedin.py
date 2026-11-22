@@ -52,7 +52,7 @@ class LinkedInPublicJobs:
             response: httpx.Response | None = None
             try:
                 response = self.client.get("/jobs/search/", params=params)
-                if response.status_code < 500 and response.status_code not in {429, 999}:
+                if response.status_code < 500 and response.status_code not in {403, 429, 999}:
                     response.raise_for_status()
                     return response
                 last_error = httpx.HTTPStatusError(
